@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emergency Operations Center</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<header>
+    <h1>Emergency Operations Center</h1>
+    <p>Strategic Disaster & Incident Coordination Dashboard</p>
+</header>
+
+<div class="container">
+
+<div class="stats">
+
+<div class="card">
+<h2>{{ incidents|length }}</h2>
+<p>Total Incidents</p>
+</div>
+
+<div class="card">
+<h2>{{ resources.ambulances }}</h2>
+<p>Ambulances</p>
+</div>
+
+<div class="card">
+<h2>{{ resources.fire_units }}</h2>
+<p>Fire Units</p>
+</div>
+
+<div class="card">
+<h2>{{ resources.police_units }}</h2>
+<p>Police Units</p>
+</div>
+
+</div>
+
+<div class="panel" style="margin-bottom:25px">
+
+<h2>Emergency Operations Overview</h2>
+
+<div class="stats">
+
+<div class="card">
+<h2 id="activeIncidents">2</h2>
+<p>Active Incidents</p>
+</div>
+
+<div class="card">
+<h2 id="criticalCount">1</h2>
+<p>Critical Events</p>
+</div>
+
+<div class="card">
+<h2>Normal</h2>
+<p>Regional Status</p>
+</div>
+
+<div class="card">
+<h2 id="availableResources">49</h2>
+<p>Available Resources</p>
+</div>
+
+</div>
+
+<div style="margin-top:20px">
+
+<h3>AI Situation Assessment</h3>
+
+<div
+id="aiSummary"
+style="
+background:#eef5ff;
+padding:18px;
+border-left:5px solid #1565c0;
+border-radius:8px;
+margin-top:10px;
+">
+
+No significant regional risk detected.
+
+</div>
+
+</div>
+
+</div>
+
+<div class="main-grid">
+
+<div class="panel">
+
+<h2>Report New Incident</h2>
+
+<form id="incidentForm">
+
+<input
+id="title"
+type="text"
+placeholder="Incident Title"
+required>
+
+<input
+id="location"
+type="text"
+placeholder="Location"
+required>
+
+<select id="priority">
+<option>High</option>
+<option>Medium</option>
+<option>Low</option>
+</select>
+
+<button type="submit">
+Report Incident
+</button>
+
+</form>
+
+</div>
+
+<div class="panel">
+
+<h2>Resource Status</h2>
+
+<ul class="resource-list">
+
+<li>Ambulances : {{ resources.ambulances }}</li>
+
+<li>🚒 Fire Units : {{ resources.fire_units }}</li>
+
+<li>👮 Police Units : {{ resources.police_units }}</li>
+
+<li>🏠 Emergency Shelters : {{ resources.shelters }}</li>
+
+</ul>
+
+</div>
+
+</div>
+
+<div class="main-grid">
+
+<div class="panel">
+
+<h2>Incident Map</h2>
+
+<div id="map"></div>
+
+</div>
+
+<div class="panel">
+
+<h2>Priority Distribution</h2>
+
+<canvas id="priorityChart"></canvas>
+
+</div>
+
+</div>
+
+<div class="panel">
+
+<h2>Live Incident Feed</h2>
+
+<table>
+
+<thead>
+
+<tr>
+<th>ID</th>
+<th>Incident</th>
+<th>Location</th>
+<th>Priority</th>
+<th>Status</th>
+<th>Time</th>
+<th>Workflow</th>
+<th>AI Assist</th>
+</tr>
+
+</thead>
+
+<tbody id="incidentTable">
+
+{% for incident in incidents %}
+
+<tr>
+
+<td>{{ incident.id }}</td>
+
+<td>{{ incident.title }}</td>
+
+<td>{{ incident.location }}</td>
+
+<td>
+<span class="priority-{{ incident.priority|lower }}">
+{{ incident.priority }}
+</span>
+</td>
+
+<td id="status-{{ incident.id }}">
+{{ incident.status }}
+</td>
+
+<td>{{ incident.time }}</td>
+
+<td>
+<button onclick="advance({{ incident.id }})">
+Advance
+</button>
+</td>
+
+<td>
+<button onclick='recommend({{ incident.recommendation|tojson }})'>
+AI
+</button>
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
+
+<div id="incidentModal" class="modal">
+
+<div class="modal-content">
+
+<span class="close" onclick="closeModal()">&times;</span>
+
+<h2>Incident Intelligence</h2>
+
+<div id="modalBody"></div>
+
+</div>
+
+</div>
+
